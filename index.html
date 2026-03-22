@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#92400e">
-    <title>Adventure World - ことばの冒険</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+    <title>めざせ！漢字マスター！</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,7 +78,7 @@
         .question-card::before { content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(251,191,36,0.15), transparent); border-radius: 50%; }
         .question-category { display: inline-block; background: var(--amber-100); color: var(--amber-700); padding: 4px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
         .question-text { font-size: 72px; font-weight: 900; color: var(--amber-900); line-height: 1; position: relative; z-index: 1; }
-        .question-text.english-word { font-size: 48px; letter-spacing: -1px; }
+        .question-text.small-text { font-size: 48px; letter-spacing: -1px; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .option-btn { display: flex; align-items: center; padding: 16px; background: white; border: 3px solid var(--amber-100); border-bottom-width: 5px; border-radius: 18px; cursor: pointer; font-family: inherit; font-size: 22px; font-weight: 800; color: var(--amber-900); text-align: left; gap: 12px; transition: all 0.15s; touch-action: manipulation; min-height: 64px; }
         .option-btn:active:not(:disabled) { transform: scale(0.96); }
@@ -151,22 +151,22 @@
 </head>
 <body>
 <div class="loading-overlay" id="loading-overlay">
-    <div class="loading-spinner">⚔️</div>
+    <div class="loading-spinner">📝</div>
     <div class="loading-text" id="loading-text">データを よみこみ中...</div>
     <div class="loading-error hidden" id="loading-error"></div>
 </div>
 <div id="app">
     <header class="app-header" id="app-header">
-        <div class="logo"><div class="logo-icon">⚔️</div><h1>Adventure World</h1></div>
+        <div class="logo"><div class="logo-icon">📝</div><h1>漢字マスター</h1></div>
         <div class="header-stats"><span>⭐</span><span id="header-xp">0 XP</span></div>
     </header>
     <main class="app-main">
         <!-- START -->
         <div class="screen start-screen active" id="screen-start">
-            <div class="start-icon">⚔️</div>
-            <h1 class="start-title">Adventure<br>World</h1>
-            <p class="start-subtitle">〜 ことばの 冒険 〜</p>
-            <div style="width:80%;"><button class="btn btn-primary" style="font-size:22px;padding:18px;animation:pulse 1.5s infinite;" onclick="Nav.go('home')">ぼうけんに でる！</button></div>
+            <div class="start-icon">📝</div>
+            <h1 class="start-title">めざせ！<br>漢字マスター！</h1>
+            <p class="start-subtitle">〜 よめるかな？ 〜</p>
+            <div style="width:80%;"><button class="btn btn-primary" style="font-size:22px;padding:18px;animation:pulse 1.5s infinite;" onclick="Nav.go('home')">チャレンジ スタート！</button></div>
         </div>
         <!-- HOME -->
         <div class="screen" id="screen-home">
@@ -198,11 +198,11 @@
         <div class="screen" id="screen-quiz" style="position:relative;">
             <div class="quiz-header"><span id="quiz-timer">⏱️ 0.0s</span><span id="quiz-progress">🎯 1 / 10</span></div>
             <div class="question-card">
-                <div class="question-category" id="quiz-category">ENGLISH → にほんご</div>
-                <div class="question-text english-word" id="quiz-question">?</div>
+                <div class="question-category" id="quiz-category">漢字 → よみがな</div>
+                <div class="question-text" id="quiz-question">?</div>
             </div>
             <div class="options-grid" id="quiz-options"></div>
-            <div class="mascot-hint"><div class="mascot-emoji">🦁</div><div class="hint-bubble" id="quiz-hint">がんばれ、ぼうけんしゃ！</div></div>
+            <div class="mascot-hint"><div class="mascot-emoji">🦁</div><div class="hint-bubble" id="quiz-hint">がんばれ！</div></div>
             <button class="btn btn-ghost" style="margin-top:12px;font-size:13px;min-height:42px;" onclick="Quiz.confirmExit()">🚪 やめて もどる</button>
             <div class="pause-overlay" id="quiz-pause"><div style="text-align:center;"><div style="font-size:48px;margin-bottom:8px;">⏸️</div><div style="font-weight:800;font-size:18px;color:var(--amber-700);">いちじていし中...</div><button class="btn btn-primary" style="margin-top:16px;width:auto;padding:10px 32px;" onclick="Quiz.resume()">つづける</button></div></div>
         </div>
@@ -272,13 +272,13 @@ let quizData = { categories: [] };
 let characterData = { characters: [], meta: {} };
 
 const hints = [
-    "がんばれ、ぼうけんしゃ！きみなら できるよ！",
+    "がんばれ！きみなら できるよ！",
     "おちついて かんがえよう！",
     "まちがえても だいじょうぶ。つぎ がんばろう！",
     "すごいね！その ちょうしだよ！",
-    "ヒント: こえに だして よんでみよう！",
+    "ヒント: おんよみ？ くんよみ？ よく みてね！",
     "もうちょっとだ！ファイト！",
-    "きみは ことばの ゆうしゃだ！",
+    "きみは 漢字マスターに なれる！",
 ];
 
 // ==========================================
@@ -337,7 +337,7 @@ const DataLoader = {
 const DB = {
     db: null,
     init: () => new Promise((resolve, reject) => {
-        const req = indexedDB.open("AdventureWorldDB", 2);
+        const req = indexedDB.open("KanjiMasterDB", 2);
         req.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains("results")) { const s = db.createObjectStore("results", { keyPath: "id", autoIncrement: true }); s.createIndex("mode", "mode", { unique: false }); }
@@ -387,11 +387,11 @@ const DB = {
 const Profile = {
     get: (name) => {
         try {
-            const d = JSON.parse(localStorage.getItem('awProfile_' + name));
+            const d = JSON.parse(localStorage.getItem('kmProfile_' + name));
             return { xp: d?.xp || 0, totalCorrect: d?.totalCorrect || 0, unlocked: d?.unlocked || [] };
         } catch { return { xp: 0, totalCorrect: 0, unlocked: [] }; }
     },
-    save: (name, data) => localStorage.setItem('awProfile_' + name, JSON.stringify(data)),
+    save: (name, data) => localStorage.setItem('kmProfile_' + name, JSON.stringify(data)),
     addCorrect: (name, count) => {
         const p = Profile.get(name);
         const oldXp = p.xp;
@@ -415,7 +415,7 @@ const UserSettings = {
         UserSettings.timeLimit = await DB.get('timeLimit') || 0;
         document.getElementById('setting-count').value = UserSettings.targetCount;
         document.getElementById('setting-time').value = UserSettings.timeLimit;
-        const n = localStorage.getItem('awPlayerName');
+        const n = localStorage.getItem('kmPlayerName');
         if (n) document.getElementById('player-name').value = n;
     },
     save: async () => {
@@ -534,12 +534,12 @@ const Quiz = {
         const ne = document.getElementById('player-name');
         Quiz.playerName = ne.value.trim();
         if (!Quiz.playerName) { alert('なまえを いれてね！'); ne.focus(); return; }
-        localStorage.setItem('awPlayerName', Quiz.playerName);
+        localStorage.setItem('kmPlayerName', Quiz.playerName);
         Quiz.mode = mode; Quiz.data = cat.questions;
         Quiz.targetCount = UserSettings.targetCount; Quiz.timeLimit = UserSettings.timeLimit;
         Quiz.qCount = Quiz.score = 0; Quiz.isPaused = false; Quiz.startTime = Date.now();
         Nav.go('quiz');
-        document.getElementById('quiz-category').textContent = cat.name.toUpperCase();
+        document.getElementById('quiz-category').textContent = cat.name;
         if (mode==='3min') { Quiz.remain3Min = 180; Quiz.run3MinTimer(); } else { Quiz.runStopwatch(); }
         Quiz.renderNext();
     },
@@ -555,7 +555,7 @@ const Quiz = {
         const target = Quiz.data[Math.floor(Math.random()*Quiz.data.length)];
         const qEl = document.getElementById('quiz-question');
         qEl.textContent = target.q;
-        qEl.className = 'question-text' + (target.q.length > 2 ? ' english-word' : '');
+        qEl.className = 'question-text' + (target.q.length > 2 ? ' small-text' : '');
         qEl.style.animation = 'none'; requestAnimationFrame(() => { qEl.style.animation = 'popIn 0.3s ease'; });
         document.getElementById('quiz-progress').textContent = Quiz.mode==='custom' ? '🎯 '+(Quiz.qCount+1)+' / '+Quiz.targetCount : '🎯 せいかい: '+Quiz.score;
         document.getElementById('quiz-hint').textContent = hints[Math.floor(Math.random()*hints.length)];
