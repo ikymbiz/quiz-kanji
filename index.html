@@ -187,7 +187,18 @@
             </div>
             <div class="card" style="margin-bottom:16px;text-align:center;">
                 <label class="setting-label" style="margin-bottom:8px;">📚 ちょうせんする レベル</label>
-                <select id="category-select" class="input-field" style="appearance:none;cursor:pointer;margin-bottom:16px;"></select>
+                <select id="grade-select" class="input-field" style="cursor:pointer;margin-bottom:10px;">
+                    <option value="1">1年生</option>
+                    <option value="2">2年生</option>
+                    <option value="3">3年生</option>
+                    <option value="4">4年生</option>
+                    <option value="5">5年生</option>
+                    <option value="6">6年生</option>
+                </select>
+                <select id="reading-select" class="input-field" style="cursor:pointer;margin-bottom:16px;">
+                    <option value="on">音読み（オン）</option>
+                    <option value="kun">訓読み（くん）</option>
+                </select>
                 <div class="space-y-12">
                     <button class="btn btn-primary" style="font-size:19px;" onclick="Quiz.start('custom')">🎯 クイズに ちょうせん！</button>
                     <button class="btn btn-success" onclick="Quiz.start('3min')">⏱️ 3ぷんかん チャレンジ</button>
@@ -460,9 +471,6 @@ const Nav = {
         const cMod = p.totalCorrect % CORRECT_PER_XP;
         document.getElementById('home-correct-label').textContent = '✅ ' + cMod + ' / ' + CORRECT_PER_XP + ' せいかい → つぎの XP';
         document.getElementById('home-correct-bar').style.width = (cMod / CORRECT_PER_XP * 100) + '%';
-        const sel = document.getElementById('category-select');
-        sel.innerHTML = '';
-        quizData.categories.forEach(c => sel.add(new Option(c.name, c.id)));
     },
     setupRanking: async () => {
         const records = await DB.getAllRecords();
@@ -528,7 +536,9 @@ const Quiz = {
     playerName:'ゲスト',
 
     start: (mode) => {
-        const catId = document.getElementById('category-select').value;
+        const grade = document.getElementById('grade-select').value;
+        const reading = document.getElementById('reading-select').value;
+        const catId = 'kanji_g' + grade + '_' + reading;
         const cat = quizData.categories.find(c => c.id === catId);
         if (!cat || !cat.questions.length) return alert('もんだいが ありません。');
         const ne = document.getElementById('player-name');
