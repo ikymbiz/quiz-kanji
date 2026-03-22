@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "version": "1.1",
+    "description": "Adventure World キャラクターデータ",
+    "unlockRule": {
+      "xpPerUnlock": 10,
+      "note": "XPが10たまるごとにキャラクターが1体アンロックされる"
+    },
+    "imageDir": "images/",
+    "imageNote": "画像は images/ フォルダに配置。推奨サイズ: 200x200px以上の正方形PNG（透過背景推奨）"
+  },
+  "characters": [
+    {
+      "id": "c001",
+      "name": "ゆうしゃスライム",
+      "image": "images/c001.png",
+      "desc": "ぼうけんに はじめてでた ぷるぷるの スライム。",
+      "rarity": "common",
+      "series": "はじまりの なかま"
+    },
+    {
+      "id": "c002",
+      "name": "まほうつかいネコ",
+      "image": "images/c002.png",
+      "desc": "ほのおの まほうを つかう かしこいネコ。",
+      "rarity": "common",
+      "series": "はじまりの なかま"
+    },
+    {
+      "id": "c003",
+      "name": "せんしイヌ",
+      "image": "images/c003.png",
+      "desc": "けんが とっても つよい。ほねが すき。",
+      "rarity": "common",
+      "series": "はじまりの なかま"
+    },
+    {
+      "id": "c004",
+      "name": "そうりょウサギ",
+      "image": "images/c004.png",
+      "desc": "けがを なおしてくれる やさしいウサギ。",
+      "rarity": "common",
+      "series": "はじまりの なかま"
+    },
+    {
+      "id": "c005",
+      "name": "にんじゃキツネ",
+      "image": "images/c005.png",
+      "desc": "すばやい うごきで てきを めくらませる。",
+      "rarity": "rare",
+      "series": "かげの いちぞく"
+    },
+    {
+      "id": "c006",
+      "name": "かいぞくペンギン",
+      "image": "images/c006.png",
+      "desc": "うみの おたからを さがす ゆうかんな ペンギン。",
+      "rarity": "rare",
+      "series": "うみの ぼうけんしゃ"
+    },
+    {
+      "id": "c007",
+      "name": "ほしふりユニコーン",
+      "image": "images/c007.png",
+      "desc": "よぞらに ひかる つのを もつ まぼろしの いきもの。",
+      "rarity": "rare",
+      "series": "ほしの まもりびと"
+    },
+    {
+      "id": "c008",
+      "name": "てつじんゴーレム",
+      "image": "images/c008.png",
+      "desc": "からだが てつで できた ちからもち。",
+      "rarity": "rare",
+      "series": "こだいの へいき"
+    },
+    {
+      "id": "c009",
+      "name": "まおうドラゴン",
+      "image": "images/c009.png",
+      "desc": "せかいで いちばん つよい でんせつの ドラゴン。",
+      "rarity": "legendary",
+      "series": "でんせつの もの"
+    },
+    {
+      "id": "c010",
+      "name": "てんしフェニックス",
+      "image": "images/c010.png",
+      "desc": "なんども よみがえる ふしちょう。ゆうきの しょうちょう。",
+      "rarity": "legendary",
+      "series": "でんせつの もの"
+    }
+  ]
+}
