@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#4a90e2">
-    <title>めざせ！漢字マスター！</title>
-    <!-- PWA: インラインマニフェスト -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E6%BC%A2%E5%AD%97%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC%22%2C%22short_name%22%3A%22%E6%BC%A2%E5%AD%97%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8f9fa%22%2C%22theme_color%22%3A%22%234a90e2%22%7D">
-    <!-- SVG Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>">
+    <title>かん字マスター！〜こくごのぼうけん〜</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    
+    <!-- PWA Web Manifest (Data URI) -->
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E3%81%8B%E3%82%93%E5%AD%97%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC%22%2C%22short_name%22%3A%22%E3%81%8B%E3%82%93%E5%AD%97%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8f9fa%22%2C%22theme_color%22%3A%22%234a90e2%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ctext%20y%3D%27.9em%27%20font-size%3D%2790%27%3E%F0%9F%93%96%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D'>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --main-bg: #f8f9fa;
@@ -16,7 +18,12 @@
             --primary: #4a90e2;
             --accent: #f39c12;
             --success: #2ecc71;
+            --info: #9b59b6;
+            --graph: #3498db;
+            --collection: #e84393;
             --text: #2c3e50;
+            --correct-color: #e74c3c;
+            --incorrect-color: #2ecc71;
         }
 
         body {
@@ -29,6 +36,7 @@
             min-height: 100vh;
             margin: 0;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow: hidden; 
         }
 
         #app {
@@ -39,113 +47,160 @@
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             text-align: center;
+            position: relative;
+            max-height: 90vh; 
+            overflow-y: auto; 
         }
 
         h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 1.5rem; }
         .hidden { display: none !important; }
 
-        select, button {
-            width: 100%;
-            padding: 12px;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            border: 2px solid #eee;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            /* 48x48dp タッチターゲットの確保 */
-            min-height: 48px; 
+        select, input[type="number"], input[type="text"], button {
+            width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 10px;
+            border: 2px solid #eee; margin-bottom: 10px; cursor: pointer;
+            transition: all 0.2s; min-height: 48px; box-sizing: border-box; 
         }
 
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            font-weight: bold;
-            position: relative;
-            overflow: hidden;
-        }
+        input[type="number"], input[type="text"] { cursor: text; }
 
-        /* リップル風のホバーエフェクト */
-        button:hover { opacity: 0.9; transform: translateY(-2px); }
-        button:active { transform: translateY(0); }
+        button { background-color: var(--primary); color: white; border: none; font-weight: bold; position: relative; overflow: hidden; }
+        button:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); }
+        button:active:not(:disabled) { transform: translateY(0); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
-        .mode-btn-10 { background-color: var(--accent); margin-top: 10px; }
+        .mode-btn-custom { background-color: var(--accent); margin-top: 10px; }
         .mode-btn-3m { background-color: var(--success); margin-top: 10px; }
+        .mode-btn-history { background-color: var(--info); margin-top: 10px; }
+        .mode-btn-graph { background-color: var(--graph); margin-top: 10px; }
+        .mode-btn-collection { background-color: var(--collection); margin-top: 10px; }
 
-        .label-text {
-            text-align: left;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            font-weight: bold;
-            margin: 10px 0 5px 5px;
-            display: block;
-        }
+        .label-text { text-align: left; font-size: 0.9rem; color: #7f8c8d; font-weight: bold; margin: 10px 0 5px 5px; display: block; }
 
-        /* クイズ画面 */
-        #stat-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            font-weight: bold;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
+        details { text-align: left; background: #fdfdfd; border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 15px; }
+        summary { font-weight: bold; color: #34495e; cursor: pointer; outline: none; }
+        #json-textarea { width: 100%; height: 150px; font-family: monospace; font-size: 0.85rem; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; margin-bottom: 10px; resize: vertical; }
+        .apply-btn { background-color: #34495e; font-size: 1rem; padding: 8px; min-height: 40px; }
+        .io-btn { background-color: #7f8c8d; font-size: 0.9rem; padding: 8px; min-height: 40px; margin-bottom: 5px; }
 
-        #kanji-display {
-            font-size: 6rem;
-            margin: 1.5rem 0;
-            color: var(--text);
-            font-weight: bold;
-        }
+        #stat-bar { display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: bold; font-size: 0.9rem; color: #7f8c8d; }
+        .time-warning { color: #e74c3c !important; }
 
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+        #question-display { font-size: 4rem; margin: 1.5rem 0; color: var(--text); font-weight: bold; word-break: break-word; }
 
-        .option-btn {
-            background: white;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            margin-bottom: 0;
-        }
-
-        .option-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .option-btn { background: white; color: var(--primary); border: 2px solid var(--primary); margin-bottom: 0; }
+        .option-btn:hover:not(:disabled) { background: var(--primary); color: white; }
 
         #result-display { font-size: 2.5rem; color: var(--accent); margin: 1.5rem 0; font-weight: bold; }
+
+        #feedback-mark {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+            font-size: 15rem; font-weight: bold; z-index: 1000; pointer-events: none; opacity: 0;
+            transition: opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        #feedback-mark.show-correct { color: var(--correct-color); opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+        #feedback-mark.show-incorrect { color: var(--incorrect-color); opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+
+        .overlay-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .popup-box {
+            background: white; padding: 2.5rem; border-radius: 20px;
+            text-align: center; max-width: 80%; width: 300px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        #player-status-box {
+            background: #fff3cd; border: 1px solid #ffeeba; border-radius: 10px;
+            padding: 10px; margin-bottom: 15px; font-size: 0.95rem; color: #856404; font-weight: bold;
+        }
+
+        .collection-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px;
+            padding: 5px; margin-bottom: 20px;
+        }
+        .char-card {
+            background: white; border: 2px solid #eee; border-radius: 10px; padding: 15px 5px;
+            text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s;
+        }
+        .char-card:hover { transform: scale(1.05); }
+        .char-card.locked { background: #f8f9fa; border-color: #ddd; filter: grayscale(100%); opacity: 0.6; }
+        .char-emoji { font-size: 2.5rem; margin-bottom: 5px; }
+        .char-name { font-size: 0.75rem; font-weight: bold; color: var(--text); word-break: break-all; }
+        .char-desc { font-size: 0.65rem; color: #7f8c8d; margin-top: 3px; display: none; }
+        .char-card:not(.locked) .char-desc { display: block; }
     </style>
 </head>
 <body>
 
+<div id="feedback-mark"></div>
+
+<div id="screen-celebration" class="overlay-screen hidden">
+    <div class="popup-box">
+        <div style="font-size: 4rem; animation: bounce 1s infinite;">🎉</div>
+        <h2 style="color: var(--accent); margin-bottom: 0.5rem;">スゴイ！！</h2>
+        <p style="font-size: 1rem; line-height: 1.5; color: var(--text);">
+            <strong style="color: var(--correct-color); font-size: 1.2rem;">5かい れんぞく</strong>で<br>まえの きろくを こえたよ！
+        </p>
+        <button onclick="document.getElementById('screen-celebration').classList.add('hidden')" style="margin-top: 1rem;">とじる</button>
+    </div>
+</div>
+
+<div id="screen-char-get" class="overlay-screen hidden">
+    <div class="popup-box">
+        <h2 style="color: var(--collection); margin-top: 0;">あたらしい なかま！</h2>
+        <div id="get-char-emoji" style="font-size: 5rem; margin: 10px 0; animation: popIn 0.5s 0.2s both;">❓</div>
+        <h3 id="get-char-name" style="margin-bottom: 5px;">---</h3>
+        <p id="get-char-desc" style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0;"></p>
+        <button onclick="document.getElementById('screen-char-get').classList.add('hidden')" style="background-color: var(--collection); margin-top: 1rem;">やったー！</button>
+    </div>
+</div>
+
 <div id="app">
     <div id="screen-home">
-        <h1>めざせ！漢字マスター！</h1>
+        <h1 id="app-title">かん字マスター！</h1>
         
-        <span class="label-text">学年をえらんでね</span>
-        <select id="grade-select">
-            <option value="1">小学1年生</option>
-            <option value="2">小学2年生</option>
-            <option value="3">小学3年生</option>
-            <option value="4">小学4年生</option>
-            <option value="5">小学5年生</option>
-            <option value="6">小学6年生</option>
-        </select>
+        <div id="home-controls">
+            <details>
+                <summary>🔧 もんだいデータの設定 (JSON)</summary>
+                <div style="margin-top: 15px;">
+                    <span class="label-text" style="margin-left:0;">📂 ファイルから よみこむ / ほぞんする</span>
+                    <input type="file" id="json-file-input" accept=".json" style="font-size: 0.9rem; padding: 5px;" onchange="importJson(event)">
+                    <button class="io-btn" onclick="exportJson()">いまのデータをファイルにほぞん</button>
+                    
+                    <span class="label-text" style="margin-left:0;">✍️ 直接へんしゅう</span>
+                    <textarea id="json-textarea"></textarea>
+                    <button class="apply-btn" onclick="applyJsonData(true)">このデータを はんえいする</button>
+                </div>
+            </details>
 
-        <span class="label-text">出題パターンをえらんでね</span>
-        <select id="pattern-select">
-            <option value="mix">音訓ミックス問題</option>
-            <option value="on">音読み問題</option>
-            <option value="kun_no_okurigana">訓読み問題（送り仮名なし）</option>
-            <option value="kun_with_okurigana">訓読み問題（送り仮名あり）</option>
-        </select>
+            <span class="label-text">なまえを おしえてね</span>
+            <input type="text" id="player-name-input" placeholder="なまえ（れい: たろう）">
+            
+            <div id="player-status-box">けいけんち データよみこみ中...</div>
 
-        <button class="mode-btn-3m" onclick="startGame('3min')">3分間チャレンジ</button>
-        <button class="mode-btn-10" onclick="startGame('10q')">10問タイムアタック</button>
+            <span class="label-text">どの かん字に ちょうせんする？</span>
+            <select id="category-select"></select>
+
+            <span class="label-text">もんだいのかず</span>
+            <input type="number" id="question-count-input" value="10" min="1" max="100">
+
+            <span class="label-text">1もんの せいげんじかん（秒・0で なし）</span>
+            <input type="number" id="time-limit-input" value="0" min="0" max="60">
+
+            <button class="mode-btn-custom" onclick="startGame('custom')">クイズに ちょうせん！</button>
+            <button class="mode-btn-3m" onclick="startGame('3min')">3ぷんかん チャレンジ</button>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="mode-btn-collection" onclick="showCollection()" style="margin-top: 0;">🎁 ずかん</button>
+                <button class="mode-btn-history" onclick="showRanking()" style="margin-top: 0;">👑 ランキング</button>
+            </div>
+        </div>
     </div>
 
     <div id="screen-quiz" class="hidden">
@@ -153,283 +208,281 @@
             <span id="timer-text">タイム: 0.00</span>
             <span id="progress-text">1 / 10</span>
         </div>
-        <div id="kanji-display">?</div>
+        <div id="question-display">?</div>
         <div class="options-grid" id="options-container"></div>
-        <!-- 追加: クイズ中断用のボタン -->
-        <button onclick="goHome()" style="margin-top: 2rem; background-color: #e74c3c;">中断してホームにもどる</button>
+        <button onclick="goHome()" style="margin-top: 2rem; background-color: #e74c3c;">やめて ホームにもどる</button>
     </div>
 
     <div id="screen-result" class="hidden">
-        <h1>結果発表！</h1>
+        <h1>けっかはっぴょう！</h1>
         <p id="result-label"></p>
         <div id="result-display"></div>
+        <p style="color: var(--accent); font-weight: bold; margin-bottom: 15px;">✨ けいけんち(XP) ＋1 ゲット！</p>
+        
+        <button onclick="goHome()">タイトルにもどる</button>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="mode-btn-collection" onclick="showCollection()" style="margin-top: 0;">🎁 ずかん</button>
+            <button class="mode-btn-history" onclick="showRanking()" style="margin-top: 0;">👑 ランキング</button>
+        </div>
+    </div>
+
+    <div id="screen-history" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h1 style="margin: 0;">👑 トップ10</h1>
+            <button onclick="showGraph()" style="width: auto; margin: 0; padding: 5px 15px; font-size: 0.9rem; background-color: var(--graph);">📈 グラフ</button>
+        </div>
+        <h2 class="ranking-title" style="color: var(--success);">⏱️ 3ぷんかん チャレンジ</h2>
+        <div id="ranking-3min" class="history-list"></div>
+        <h2 class="ranking-title" style="color: var(--accent);">🎯 もんだいすう チャレンジ</h2>
+        <div id="ranking-custom" class="history-list"></div>
+        <button onclick="goHome()">タイトルにもどる</button>
+    </div>
+
+    <div id="screen-graph" class="hidden">
+        <h1>📈 まいにちの せいちょう</h1>
+        <div class="chart-container" style="height: 250px; margin-bottom:15px; background:white; padding:10px; border-radius:10px; border:1px solid #ddd;">
+            <canvas id="scoreChart"></canvas>
+        </div>
+        <button onclick="showRanking()" style="background-color: var(--info); margin-bottom: 10px;">👑 ランキングにもどる</button>
+        <button onclick="goHome()">タイトルにもどる</button>
+    </div>
+
+    <div id="screen-collection" class="hidden">
+        <h1 style="color: var(--collection);">🎁 なかま ずかん</h1>
+        <p style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 15px;">クイズを10回クリアするごとに あたらしい なかまが もらえるよ！</p>
+        
+        <div id="collection-grid" class="collection-grid">
+        </div>
+
         <button onclick="goHome()">タイトルにもどる</button>
     </div>
 </div>
 
 <script>
-    /**
-     * 漢字データ (要件に従い構造を拡張: 音読み/訓読み、送り仮名の有無を追加)
-     */
-    const KANJI_MASTER_DATA = {
-        "1": [
-            {k:"一", readings:[{type:"on", text:"イチ", hasOkurigana:false}, {type:"kun", text:"ひとつ", hasOkurigana:true}]},
-            {k:"右", readings:[{type:"on", text:"ユウ", hasOkurigana:false}, {type:"kun", text:"みぎ", hasOkurigana:false}]},
-            {k:"雨", readings:[{type:"on", text:"ウ", hasOkurigana:false}, {type:"kun", text:"あめ", hasOkurigana:false}]},
-            {k:"円", readings:[{type:"on", text:"エン", hasOkurigana:false}, {type:"kun", text:"まるい", hasOkurigana:true}]},
-            {k:"王", readings:[{type:"on", text:"オウ", hasOkurigana:false}]},
-            {k:"下", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"した", hasOkurigana:false}, {type:"kun", text:"さがる", hasOkurigana:true}]},
-            {k:"火", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"ひ", hasOkurigana:false}]},
-            {k:"花", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"はな", hasOkurigana:false}]},
-            {k:"学", readings:[{type:"on", text:"ガク", hasOkurigana:false}, {type:"kun", text:"まなぶ", hasOkurigana:true}]},
-            {k:"休", readings:[{type:"on", text:"キュウ", hasOkurigana:false}, {type:"kun", text:"やすむ", hasOkurigana:true}]},
-            {k:"金", readings:[{type:"on", text:"キン", hasOkurigana:false}, {type:"kun", text:"かね", hasOkurigana:false}]},
-            {k:"空", readings:[{type:"on", text:"クウ", hasOkurigana:false}, {type:"kun", text:"そら", hasOkurigana:false}]},
-            {k:"月", readings:[{type:"on", text:"ゲツ", hasOkurigana:false}, {type:"kun", text:"つき", hasOkurigana:false}]},
-            {k:"犬", readings:[{type:"on", text:"ケン", hasOkurigana:false}, {type:"kun", text:"いぬ", hasOkurigana:false}]},
-            {k:"口", readings:[{type:"on", text:"コウ", hasOkurigana:false}, {type:"kun", text:"くち", hasOkurigana:false}]},
-            {k:"左", readings:[{type:"on", text:"サ", hasOkurigana:false}, {type:"kun", text:"ひだり", hasOkurigana:false}]},
-            {k:"山", readings:[{type:"on", text:"サン", hasOkurigana:false}, {type:"kun", text:"やま", hasOkurigana:false}]},
-            {k:"子", readings:[{type:"on", text:"シ", hasOkurigana:false}, {type:"kun", text:"こ", hasOkurigana:false}]},
-            {k:"手", readings:[{type:"on", text:"シュ", hasOkurigana:false}, {type:"kun", text:"て", hasOkurigana:false}]}
-        ],
-        "2": [
-            {k:"引", readings:[{type:"on", text:"イン", hasOkurigana:false}, {type:"kun", text:"ひく", hasOkurigana:true}]},
-            {k:"羽", readings:[{type:"on", text:"ウ", hasOkurigana:false}, {type:"kun", text:"はね", hasOkurigana:false}]},
-            {k:"雲", readings:[{type:"on", text:"ウン", hasOkurigana:false}, {type:"kun", text:"くも", hasOkurigana:false}]},
-            {k:"園", readings:[{type:"on", text:"エン", hasOkurigana:false}, {type:"kun", text:"その", hasOkurigana:false}]},
-            {k:"何", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"なに", hasOkurigana:false}]},
-            {k:"夏", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"なつ", hasOkurigana:false}]},
-            {k:"家", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"いえ", hasOkurigana:false}]},
-            {k:"海", readings:[{type:"on", text:"カイ", hasOkurigana:false}, {type:"kun", text:"うみ", hasOkurigana:false}]},
-            {k:"絵", readings:[{type:"on", text:"カイ", hasOkurigana:false}, {type:"on", text:"エ", hasOkurigana:false}]},
-            {k:"外", readings:[{type:"on", text:"ガイ", hasOkurigana:false}, {type:"kun", text:"そと", hasOkurigana:false}]},
-            {k:"間", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"あいだ", hasOkurigana:false}]},
-            {k:"顔", readings:[{type:"on", text:"ガン", hasOkurigana:false}, {type:"kun", text:"かお", hasOkurigana:false}]},
-            {k:"記", readings:[{type:"on", text:"キ", hasOkurigana:false}, {type:"kun", text:"しるす", hasOkurigana:true}]},
-            {k:"帰", readings:[{type:"on", text:"キ", hasOkurigana:false}, {type:"kun", text:"かえる", hasOkurigana:true}]},
-            {k:"牛", readings:[{type:"on", text:"ギュウ", hasOkurigana:false}, {type:"kun", text:"うし", hasOkurigana:false}]},
-            {k:"魚", readings:[{type:"on", text:"ギョ", hasOkurigana:false}, {type:"kun", text:"さかな", hasOkurigana:false}]},
-            {k:"強", readings:[{type:"on", text:"キョウ", hasOkurigana:false}, {type:"kun", text:"つよい", hasOkurigana:true}]},
-            {k:"教", readings:[{type:"on", text:"キョウ", hasOkurigana:false}, {type:"kun", text:"おしえる", hasOkurigana:true}]},
-            {k:"近", readings:[{type:"on", text:"キン", hasOkurigana:false}, {type:"kun", text:"ちかい", hasOkurigana:true}]},
-            {k:"兄", readings:[{type:"on", text:"ケイ", hasOkurigana:false}, {type:"kun", text:"あに", hasOkurigana:false}]}
-        ],
-        "3": [
-            {k:"悪", readings:[{type:"on", text:"アク", hasOkurigana:false}, {type:"kun", text:"わるい", hasOkurigana:true}]},
-            {k:"安", readings:[{type:"on", text:"アン", hasOkurigana:false}, {type:"kun", text:"やすい", hasOkurigana:true}]},
-            {k:"暗", readings:[{type:"on", text:"アン", hasOkurigana:false}, {type:"kun", text:"くらい", hasOkurigana:true}]},
-            {k:"医", readings:[{type:"on", text:"イ", hasOkurigana:false}]},
-            {k:"育", readings:[{type:"on", text:"イク", hasOkurigana:false}, {type:"kun", text:"そだつ", hasOkurigana:true}]},
-            {k:"飲", readings:[{type:"on", text:"イン", hasOkurigana:false}, {type:"kun", text:"のむ", hasOkurigana:true}]},
-            {k:"運", readings:[{type:"on", text:"ウン", hasOkurigana:false}, {type:"kun", text:"はこぶ", hasOkurigana:true}]},
-            {k:"泳", readings:[{type:"on", text:"エイ", hasOkurigana:false}, {type:"kun", text:"およぐ", hasOkurigana:true}]},
-            {k:"駅", readings:[{type:"on", text:"エキ", hasOkurigana:false}]},
-            {k:"屋", readings:[{type:"on", text:"オク", hasOkurigana:false}, {type:"kun", text:"や", hasOkurigana:false}]},
-            {k:"温", readings:[{type:"on", text:"オン", hasOkurigana:false}, {type:"kun", text:"あたたかい", hasOkurigana:true}]},
-            {k:"荷", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"に", hasOkurigana:false}]},
-            {k:"界", readings:[{type:"on", text:"カイ", hasOkurigana:false}]},
-            {k:"開", readings:[{type:"on", text:"カイ", hasOkurigana:false}, {type:"kun", text:"あける", hasOkurigana:true}]},
-            {k:"階", readings:[{type:"on", text:"カイ", hasOkurigana:false}]},
-            {k:"感", readings:[{type:"on", text:"カン", hasOkurigana:false}]},
-            {k:"漢", readings:[{type:"on", text:"カン", hasOkurigana:false}]},
-            {k:"館", readings:[{type:"on", text:"カン", hasOkurigana:false}]},
-            {k:"岸", readings:[{type:"on", text:"ガン", hasOkurigana:false}, {type:"kun", text:"きし", hasOkurigana:false}]},
-            {k:"起", readings:[{type:"on", text:"キ", hasOkurigana:false}, {type:"kun", text:"おきる", hasOkurigana:true}]}
-        ],
-        "4": [
-            {k:"愛", readings:[{type:"on", text:"アイ", hasOkurigana:false}]},
-            {k:"案", readings:[{type:"on", text:"アン", hasOkurigana:false}]},
-            {k:"以", readings:[{type:"on", text:"イ", hasOkurigana:false}]},
-            {k:"衣", readings:[{type:"on", text:"イ", hasOkurigana:false}, {type:"kun", text:"ころも", hasOkurigana:false}]},
-            {k:"位", readings:[{type:"on", text:"イ", hasOkurigana:false}, {type:"kun", text:"くらい", hasOkurigana:false}]},
-            {k:"印", readings:[{type:"on", text:"イン", hasOkurigana:false}, {type:"kun", text:"しるし", hasOkurigana:false}]},
-            {k:"英", readings:[{type:"on", text:"エイ", hasOkurigana:false}]},
-            {k:"栄", readings:[{type:"on", text:"エイ", hasOkurigana:false}, {type:"kun", text:"さかえる", hasOkurigana:true}]},
-            {k:"塩", readings:[{type:"on", text:"エン", hasOkurigana:false}, {type:"kun", text:"しお", hasOkurigana:false}]},
-            {k:"億", readings:[{type:"on", text:"オク", hasOkurigana:false}]},
-            {k:"加", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"くわえる", hasOkurigana:true}]},
-            {k:"果", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"はたす", hasOkurigana:true}]},
-            {k:"貨", readings:[{type:"on", text:"カ", hasOkurigana:false}]},
-            {k:"各", readings:[{type:"on", text:"カク", hasOkurigana:false}, {type:"kun", text:"おのおの", hasOkurigana:false}]},
-            {k:"覚", readings:[{type:"on", text:"カク", hasOkurigana:false}, {type:"kun", text:"おぼえる", hasOkurigana:true}]},
-            {k:"完", readings:[{type:"on", text:"カン", hasOkurigana:false}]},
-            {k:"官", readings:[{type:"on", text:"カン", hasOkurigana:false}]},
-            {k:"管", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"くだ", hasOkurigana:false}]},
-            {k:"関", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"せき", hasOkurigana:false}]},
-            {k:"観", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"みる", hasOkurigana:true}]}
-        ],
-        "5": [
-            {k:"圧", readings:[{type:"on", text:"アツ", hasOkurigana:false}]},
-            {k:"移", readings:[{type:"on", text:"イ", hasOkurigana:false}, {type:"kun", text:"うつる", hasOkurigana:true}]},
-            {k:"因", readings:[{type:"on", text:"イン", hasOkurigana:false}, {type:"kun", text:"よる", hasOkurigana:true}]},
-            {k:"永", readings:[{type:"on", text:"エイ", hasOkurigana:false}, {type:"kun", text:"ながい", hasOkurigana:true}]},
-            {k:"営", readings:[{type:"on", text:"エイ", hasOkurigana:false}, {type:"kun", text:"いとなむ", hasOkurigana:true}]},
-            {k:"衛", readings:[{type:"on", text:"エイ", hasOkurigana:false}]},
-            {k:"易", readings:[{type:"on", text:"エキ", hasOkurigana:false}, {type:"kun", text:"やさしい", hasOkurigana:true}]},
-            {k:"益", readings:[{type:"on", text:"エキ", hasOkurigana:false}]},
-            {k:"液", readings:[{type:"on", text:"エキ", hasOkurigana:false}]},
-            {k:"演", readings:[{type:"on", text:"エン", hasOkurigana:false}]},
-            {k:"応", readings:[{type:"on", text:"オウ", hasOkurigana:false}, {type:"kun", text:"こたえる", hasOkurigana:true}]},
-            {k:"往", readings:[{type:"on", text:"オウ", hasOkurigana:false}]},
-            {k:"桜", readings:[{type:"on", text:"オウ", hasOkurigana:false}, {type:"kun", text:"さくら", hasOkurigana:false}]},
-            {k:"可", readings:[{type:"on", text:"カ", hasOkurigana:false}]},
-            {k:"仮", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"かり", hasOkurigana:false}]},
-            {k:"価", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"あたい", hasOkurigana:false}]},
-            {k:"河", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"かわ", hasOkurigana:false}]},
-            {k:"過", readings:[{type:"on", text:"カ", hasOkurigana:false}, {type:"kun", text:"すぎる", hasOkurigana:true}]},
-            {k:"快", readings:[{type:"on", text:"カイ", hasOkurigana:false}, {type:"kun", text:"こころよい", hasOkurigana:true}]},
-            {k:"解", readings:[{type:"on", text:"カイ", hasOkurigana:false}, {type:"kun", text:"とく", hasOkurigana:true}]}
-        ],
-        "6": [
-            {k:"胃", readings:[{type:"on", text:"イ", hasOkurigana:false}]},
-            {k:"異", readings:[{type:"on", text:"イ", hasOkurigana:false}, {type:"kun", text:"ことなる", hasOkurigana:true}]},
-            {k:"遺", readings:[{type:"on", text:"イ", hasOkurigana:false}]},
-            {k:"域", readings:[{type:"on", text:"イキ", hasOkurigana:false}]},
-            {k:"宇", readings:[{type:"on", text:"ウ", hasOkurigana:false}]},
-            {k:"映", readings:[{type:"on", text:"エイ", hasOkurigana:false}, {type:"kun", text:"うつる", hasOkurigana:true}]},
-            {k:"延", readings:[{type:"on", text:"エン", hasOkurigana:false}, {type:"kun", text:"のびる", hasOkurigana:true}]},
-            {k:"沿", readings:[{type:"on", text:"エン", hasOkurigana:false}, {type:"kun", text:"そう", hasOkurigana:true}]},
-            {k:"恩", readings:[{type:"on", text:"オン", hasOkurigana:false}]},
-            {k:"我", readings:[{type:"on", text:"ガ", hasOkurigana:false}, {type:"kun", text:"われ", hasOkurigana:false}]},
-            {k:"灰", readings:[{type:"on", text:"カイ", hasOkurigana:false}, {type:"kun", text:"はい", hasOkurigana:false}]},
-            {k:"拡", readings:[{type:"on", text:"カク", hasOkurigana:false}, {type:"kun", text:"ひろげる", hasOkurigana:true}]},
-            {k:"革", readings:[{type:"on", text:"カク", hasOkurigana:false}, {type:"kun", text:"かわ", hasOkurigana:false}]},
-            {k:"閣", readings:[{type:"on", text:"カク", hasOkurigana:false}]},
-            {k:"割", readings:[{type:"on", text:"カツ", hasOkurigana:false}, {type:"kun", text:"わる", hasOkurigana:true}]},
-            {k:"株", readings:[{type:"on", text:"シュ", hasOkurigana:false}, {type:"kun", text:"かぶ", hasOkurigana:false}]},
-            {k:"干", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"ほす", hasOkurigana:true}]},
-            {k:"巻", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"まく", hasOkurigana:true}]},
-            {k:"看", readings:[{type:"on", text:"カン", hasOkurigana:false}, {type:"kun", text:"みる", hasOkurigana:true}]},
-            {k:"簡", readings:[{type:"on", text:"カン", hasOkurigana:false}]}
-        ]
+    // モックデータを国語（小学生向け漢字）のテーマに変更
+    const defaultMockJSON = {
+      "appTitle": "かん字マスター！〜こくごのぼうけん〜",
+      "categories": [
+        {
+          "id": "kanji_1",
+          "name": "1ねんせいの かん字",
+          "questions": [
+            { "q": "山", "a": "やま" }, { "q": "川", "a": "かわ" }, { "q": "空", "a": "そら" },
+            { "q": "月", "a": "つき" }, { "q": "木", "a": "き" }, { "q": "水", "a": "みず" },
+            { "q": "火", "a": "ひ" }, { "q": "土", "a": "つち" }, { "q": "金", "a": "きん" },
+            { "q": "日", "a": "ひ" }
+          ]
+        },
+        {
+          "id": "kanji_2",
+          "name": "2ねんせいの かん字",
+          "questions": [
+            { "q": "春", "a": "はる" }, { "q": "夏", "a": "なつ" }, { "q": "秋", "a": "あき" },
+            { "q": "冬", "a": "ふゆ" }, { "q": "海", "a": "うみ" }, { "q": "星", "a": "ほし" },
+            { "q": "雪", "a": "ゆき" }, { "q": "風", "a": "かぜ" }, { "q": "谷", "a": "たに" },
+            { "q": "鳥", "a": "とり" }
+          ]
+        }
+      ],
+      "characters": [
+        { "id": "c1", "name": "ゆうしゃスライム", "emoji": "💧", "desc": "ぼうけんにはじめてでた ぷるぷるのスライム。" },
+        { "id": "c2", "name": "まほうつかいネコ", "emoji": "🐱", "desc": "ほのおのまほうをつかう かしこいネコ。" },
+        { "id": "c3", "name": "せんしイヌ", "emoji": "🐶", "desc": "けんが とってもつよい。ほねが すき。" },
+        { "id": "c4", "name": "そうりょウサギ", "emoji": "🐰", "desc": "けがを なおしてくれる やさしいウサギ。" },
+        { "id": "c5", "name": "にんじゃキツネ", "emoji": "🦊", "desc": "すばやいうごきで てきをめくらませる。" },
+        { "id": "c6", "name": "まおうドラゴン", "emoji": "🐉", "desc": "せかいで いちばんつよい ドラゴン。" }
+      ]
     };
 
+    let db;
+    const request = indexedDB.open("QuizMasterDB", 2); 
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains("results")) {
+            const store = db.createObjectStore("results", { keyPath: "id", autoIncrement: true });
+            store.createIndex("mode", "mode", { unique: false });
+        }
+    };
+    request.onsuccess = (e) => { db = e.target.result; };
+
+    let quizData = null;
     let currentGameMode = ''; 
-    let currentPattern = ''; 
-    let currentGradeData = [];
-    let availableQuestions = [];
+    let currentCategoryData = [];
     let qCount = 0;
     let correctScore = 0;
+    
     let startTime = 0;
     let timerInterval = null;
+    let perQuestionLimit = 0;      
+    let targetQuestionCount = 10;  
+    let questionStartTime = 0;     
+    let isAnswering = false;       
+    let currentPlayerName = "ゲスト";
 
-    // onclickからのラッパー関数 (UIからパターンを取得してinitGameへ渡す)
-    function startGame(mode) {
-        const pattern = document.getElementById('pattern-select').value;
-        initGame(mode, pattern);
-        // Android/PWA向け: History APIを利用し、戻るボタンでホームに戻れるようにする
-        history.pushState({ screen: 'quiz' }, '', '#quiz');
+    // PWA用インライン Service Worker 登録
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => self.clients.claim());
+            self.addEventListener('fetch', e => {
+                // シンプルなキャッシュ戦略（ネットワークファースト）
+                e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+            });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
     }
 
-    function initGame(mode, pattern) {
-        const grade = document.getElementById('grade-select').value;
-        currentGradeData = KANJI_MASTER_DATA[grade];
-        currentGameMode = mode;
-        currentPattern = pattern;
+    // プレイヤーのXPと取得キャラクターの管理
+    function getPlayerProfile(name) {
+        const data = localStorage.getItem('quizProfile_' + name);
+        if (data) return JSON.parse(data);
+        return { xp: 0, unlocked: [] }; 
+    }
+    function savePlayerProfile(name, profile) {
+        localStorage.setItem('quizProfile_' + name, JSON.stringify(profile));
+    }
+    function updateStatusUI() {
+        const name = document.getElementById('player-name-input').value.trim() || "ゲスト";
+        const profile = getPlayerProfile(name);
+        const nextTarget = 10 - (profile.xp % 10);
         
-        // 選択された出題パターンに合致する「漢字と読みのペア」が存在するかチェック (フェールセーフ用として維持)
-        availableQuestions = [];
-        currentGradeData.forEach(kanjiData => {
-            kanjiData.readings.forEach(r => {
-                let isValid = false;
-                if (currentPattern === 'kun_no_okurigana') isValid = (r.type === 'kun' && !r.hasOkurigana);
-                else if (currentPattern === 'kun_with_okurigana') isValid = (r.type === 'kun' && r.hasOkurigana);
-                else if (currentPattern === 'on') isValid = (r.type === 'on');
-                else isValid = true; // mixの場合は全て
+        document.getElementById('player-status-box').innerHTML = 
+            `👑 ${name} さんの けいけんち: <span style="font-size:1.2rem; color:var(--correct-color);">${profile.xp} XP</span><br>` +
+            `<span style="font-size:0.85rem; font-weight:normal; color:#555;">(あと ${nextTarget} かいクリアで なかまがふえるよ！)</span>`;
+    }
 
-                if (isValid) {
-                    availableQuestions.push({ k: kanjiData.k, r: r.text });
-                }
-            });
+    window.onload = () => {
+        document.getElementById('json-textarea').value = JSON.stringify(defaultMockJSON, null, 2);
+        applyJsonData(false);
+        
+        const savedName = localStorage.getItem('quizPlayerName');
+        if (savedName) document.getElementById('player-name-input').value = savedName;
+        
+        document.getElementById('player-name-input').addEventListener('input', updateStatusUI);
+        updateStatusUI();
+
+        // Android戻るボタン対応
+        window.addEventListener('popstate', (e) => {
+            if(!document.getElementById('screen-quiz').classList.contains('hidden') || 
+               !document.getElementById('screen-result').classList.contains('hidden') ||
+               !document.getElementById('screen-history').classList.contains('hidden') ||
+               !document.getElementById('screen-graph').classList.contains('hidden') ||
+               !document.getElementById('screen-collection').classList.contains('hidden')) {
+                goHome();
+            }
         });
+    };
 
-        // 該当するデータが存在しない場合のフェールセーフ
-        if (availableQuestions.length === 0) {
-            alert("この学年には選択したパターンの漢字がありません。別のパターンを選んでください。");
-            return;
+    function importJson(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                // 読み込んだ内容をテキストエリアにセットし、反映
+                document.getElementById('json-textarea').value = e.target.result;
+                applyJsonData(true);
+            } catch(err) {
+                alert("ファイルのよみこみに しっぱいしました。");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function exportJson() {
+        const jsonText = document.getElementById('json-textarea').value;
+        const blob = new Blob([jsonText], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'quiz_data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function applyJsonData(showAlert = false) {
+        try {
+            const jsonText = document.getElementById('json-textarea').value;
+            quizData = JSON.parse(jsonText); 
+
+            document.getElementById('app-title').innerText = quizData.appTitle || "かん字マスター！";
+            document.title = quizData.appTitle || "かん字マスター！";
+            
+            const select = document.getElementById('category-select');
+            select.innerHTML = ''; 
+            quizData.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.innerText = cat.name;
+                select.appendChild(option);
+            });
+
+            if (showAlert) alert('データを はんえいしました！');
+        } catch (error) {
+            alert('データの かたちがおかしいです。\n\n詳細: ' + error.message);
         }
+    }
 
-        document.getElementById('screen-home').classList.add('hidden');
-        document.getElementById('screen-result').classList.add('hidden');
+    function startGame(mode) {
+        if (!quizData) return;
+        const categoryId = document.getElementById('category-select').value;
+        const category = quizData.categories.find(c => c.id === categoryId);
+        if (!category || category.questions.length === 0) { alert("もんだいが ありません。"); return; }
+
+        currentPlayerName = document.getElementById('player-name-input').value.trim() || "ゲスト";
+        localStorage.setItem('quizPlayerName', currentPlayerName);
+        updateStatusUI();
+
+        targetQuestionCount = parseInt(document.getElementById('question-count-input').value, 10) || 10;
+        perQuestionLimit = parseInt(document.getElementById('time-limit-input').value, 10) || 0;
+
+        currentCategoryData = category.questions;
+        currentGameMode = mode;
+        
+        hideAllScreens();
         document.getElementById('screen-quiz').classList.remove('hidden');
+        history.pushState({ screen: 'quiz' }, '');
 
         qCount = 0;
         correctScore = 0;
         startTime = Date.now();
 
-        if (mode === '3min') {
-            run3MinTimer(180);
-        } else {
-            runStopwatch();
-        }
+        if (mode === '3min') run3MinTimer(180);
+        else runStopwatch();
 
         renderQuestion();
     }
 
     function renderQuestion() {
-        if (currentGameMode === '10q' && qCount >= 10) {
-            endGame();
-            return;
-        }
+        if (currentGameMode === 'custom' && qCount >= targetQuestionCount) { endGame(); return; }
 
-        // 選択された出題パターンに基づき、currentGradeDataから適切な漢字と読み（typeとtext）を抽出
-        let validPairs = [];
-        currentGradeData.forEach(kanjiData => {
-            kanjiData.readings.forEach(r => {
-                let isValid = false;
-                if (currentPattern === 'kun_no_okurigana') isValid = (r.type === 'kun' && !r.hasOkurigana);
-                else if (currentPattern === 'kun_with_okurigana') isValid = (r.type === 'kun' && r.hasOkurigana);
-                else if (currentPattern === 'on') isValid = (r.type === 'on');
-                else isValid = true; // mixの場合は全て
+        isAnswering = false;
+        questionStartTime = Date.now();
+        document.getElementById('timer-text').classList.remove('time-warning');
 
-                if (isValid) {
-                    validPairs.push({ k: kanjiData.k, text: r.text, type: r.type, hasOkurigana: r.hasOkurigana });
-                }
-            });
-        });
-
-        // 出題パターンに合致するリストからランダムにターゲットを決定
-        const target = validPairs[Math.floor(Math.random() * validPairs.length)];
-        document.getElementById('kanji-display').innerText = target.k;
+        const target = currentCategoryData[Math.floor(Math.random() * currentCategoryData.length)];
+        document.getElementById('question-display').innerText = target.q;
         
-        // 進行状況の更新 (改修箇所: 10問タイムアタックモード時の表示形式を要求通りに変更)
-        if (currentGameMode === '10q') {
-            document.getElementById('progress-text').innerText = `正解数: ${correctScore} / ${qCount + 1}`;
+        if (currentGameMode === 'custom') {
+            document.getElementById('progress-text').innerText = `もんだい: ${qCount + 1} / ${targetQuestionCount}`;
         } else {
-            document.getElementById('progress-text').innerText = `正解数: ${correctScore}`;
+            document.getElementById('progress-text').innerText = `せいかい: ${correctScore}`;
         }
 
-        // 選択肢の作成（正解と、出題パターンに適合する他の漢字の読みからダミーを抽出）
-        let choices = [target.text];
-        let others = validPairs.map(v => v.text).filter(t => t !== target.text);
+        let choices = [target.a];
+        let others = currentCategoryData.map(item => item.a).filter(a => a !== target.a);
+        others = [...new Set(others)].sort(() => Math.random() - 0.5); 
         
-        // 重複を排除してシャッフル
-        others = [...new Set(others)].sort(() => Math.random() - 0.5);
-        
-        // もしダミー候補が足りない場合は、全学年のデータから同じ出題パターンの読みを補充する (安全策)
         if (others.length < 3) {
             let backupOthers = [];
-            Object.values(KANJI_MASTER_DATA).forEach(gradeData => {
-                gradeData.forEach(kanjiData => {
-                    kanjiData.readings.forEach(r => {
-                        let isValid = false;
-                        if (currentPattern === 'kun_no_okurigana') isValid = (r.type === 'kun' && !r.hasOkurigana);
-                        else if (currentPattern === 'kun_with_okurigana') isValid = (r.type === 'kun' && r.hasOkurigana);
-                        else if (currentPattern === 'on') isValid = (r.type === 'on');
-                        else isValid = true; 
-
-                        if (isValid && r.text !== target.text) {
-                            backupOthers.push(r.text);
-                        }
-                    });
-                });
-            });
+            quizData.categories.forEach(cat => { cat.questions.forEach(item => { if (item.a !== target.a) backupOthers.push(item.a); }); });
             others = others.concat([...new Set(backupOthers)].sort(() => Math.random() - 0.5));
         }
-
         choices = choices.concat(others.slice(0, 3));
-        choices.sort(() => Math.random() - 0.5);
+        choices.sort(() => Math.random() - 0.5); 
 
         const container = document.getElementById('options-container');
         container.innerHTML = '';
@@ -437,76 +490,298 @@
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerText = choice;
-            // ターゲットとの比較も新しい構造に合わせて変更
-            btn.onclick = () => handleSelect(choice === target.text);
+            btn.onclick = () => handleSelect(choice === target.a);
             container.appendChild(btn);
         });
     }
 
     function handleSelect(isCorrect) {
-        if (isCorrect) correctScore++;
-        qCount++;
-        renderQuestion();
+        if (isAnswering) return; 
+        isAnswering = true; 
+
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
+        const feedback = document.getElementById('feedback-mark');
+
+        if (isCorrect) {
+            correctScore++;
+            feedback.innerText = '◯';
+            feedback.className = 'show-correct';
+        } else {
+            feedback.innerText = '✕';
+            feedback.className = 'show-incorrect';
+        }
+        setTimeout(() => { feedback.className = ''; qCount++; renderQuestion(); }, 600);
     }
 
     function run3MinTimer(seconds) {
         let remain = seconds;
-        // 即時表示
-        document.getElementById('timer-text').innerText = `残り時間 ${Math.floor(remain/60)}:${(remain%60).toString().padStart(2, '0')}`;
+        document.getElementById('timer-text').innerText = `のこり ${Math.floor(remain/60)}:${(remain%60).toString().padStart(2, '0')}`;
         timerInterval = setInterval(() => {
+            if(isAnswering) return;
             remain--;
             const m = Math.floor(remain / 60);
             const s = remain % 60;
-            document.getElementById('timer-text').innerText = `残り時間 ${m}:${s.toString().padStart(2, '0')}`;
+            document.getElementById('timer-text').innerText = `のこり ${m}:${s.toString().padStart(2, '0')}`;
             if (remain <= 0) endGame();
         }, 1000);
     }
 
     function runStopwatch() {
         timerInterval = setInterval(() => {
-            const diff = (Date.now() - startTime) / 1000;
-            document.getElementById('timer-text').innerText = `タイム: ${diff.toFixed(2)}s`;
+            if (isAnswering) return; 
+            const totalDiff = (Date.now() - startTime) / 1000;
+            const timerEl = document.getElementById('timer-text');
+            if (perQuestionLimit > 0) {
+                const qDiff = (Date.now() - questionStartTime) / 1000;
+                const remain = perQuestionLimit - qDiff;
+                if (remain <= 0) {
+                    timerEl.innerText = `のこり: 0.0s`;
+                    handleSelect(false); 
+                } else {
+                    timerEl.innerText = `のこり: ${remain.toFixed(1)}s`;
+                    if (remain <= 3) { timerEl.classList.add('time-warning'); }
+                }
+            } else {
+                timerEl.innerText = `タイム: ${totalDiff.toFixed(2)}s`;
+            }
         }, 50);
     }
 
     function endGame() {
         clearInterval(timerInterval);
-        document.getElementById('screen-quiz').classList.add('hidden');
+        hideAllScreens();
         document.getElementById('screen-result').classList.remove('hidden');
+        history.pushState({ screen: 'result' }, '');
 
         const label = document.getElementById('result-label');
         const display = document.getElementById('result-display');
+        const finalTime = (Date.now() - startTime) / 1000;
+
+        let recordData = {
+            name: currentPlayerName,
+            date: new Date().toLocaleString(),
+            mode: currentGameMode,
+            score: correctScore,
+            targetCount: targetQuestionCount,
+            time: finalTime
+        };
 
         if (currentGameMode === '3min') {
-            label.innerText = "3分間で解けた問題数：";
-            display.innerText = `${correctScore} 問`;
+            label.innerText = "3ぷんかんで できた かず：";
+            display.innerText = `${correctScore} もん`;
         } else {
-            const finalTime = (Date.now() - startTime) / 1000;
-            label.innerText = "10問解くのにかかった時間：";
-            display.innerText = `${finalTime.toFixed(2)} 秒`;
+            label.innerText = `${targetQuestionCount}もん おわるのに かかった じかん：`;
+            display.innerHTML = `${finalTime.toFixed(2)} びょう<br><span style="font-size:1.3rem; color:#7f8c8d;">せいかい: ${correctScore} / ${targetQuestionCount}</span>`;
+      }
+
+        let profile = getPlayerProfile(currentPlayerName);
+        profile.xp += 1;
+        
+        if (profile.xp % 10 === 0 && quizData.characters && quizData.characters.length > 0) {
+            let lockedChars = quizData.characters.filter(c => !profile.unlocked.includes(c.id));
+            let unlockPool = lockedChars.length > 0 ? lockedChars : quizData.characters;
+            let getChar = unlockPool[Math.floor(Math.random() * unlockPool.length)];
+            
+            if (!profile.unlocked.includes(getChar.id)) {
+                profile.unlocked.push(getChar.id);
+            }
+
+            document.getElementById('get-char-emoji').innerText = getChar.emoji;
+            document.getElementById('get-char-name').innerText = getChar.name;
+            document.getElementById('get-char-desc').innerText = getChar.desc;
+            
+            setTimeout(() => {
+                document.getElementById('screen-char-get').classList.remove('hidden');
+            }, 800);
         }
+
+      savePlayerProfile(currentPlayerName, profile);
+        updateStatusUI();
+
+        saveRecordAndCheckStreak(recordData);
+    }
+
+    function saveRecordAndCheckStreak(newRecord) {
+        if (!db) return;
+        const tx = db.transaction(["results"], "readwrite");
+        const store = tx.objectStore("results");
+
+        const request = store.getAll();
+        request.onsuccess = (e) => {
+            const allRecords = e.target.result;
+            const userRecords = allRecords.filter(r => r.name === newRecord.name && r.mode === newRecord.mode);
+            userRecords.push(newRecord);
+
+            let streak = 0;
+            for (let i = userRecords.length - 1; i > 0; i--) {
+                const current = userRecords[i];
+                const prev = userRecords[i - 1];
+                let isBetter = false;
+
+                if (current.mode === '3min') {
+                    isBetter = current.score > prev.score;
+                } else {
+                    const rateCur = current.score / current.targetCount;
+                    const ratePrev = prev.score / prev.targetCount;
+                    if (rateCur > ratePrev) { isBetter = true; } 
+                    else if (rateCur === ratePrev && current.time < prev.time) { isBetter = true; }
+                }
+
+                if (isBetter) { streak++; } else { break; }
+            }
+
+            if (streak > 0 && streak % 5 === 0) {
+                setTimeout(() => { document.getElementById('screen-celebration').classList.remove('hidden'); }, 300);
+            }
+
+            store.add(newRecord);
+        };
+    }
+
+    function showRanking() {
+        if (!db) return;
+        const tx = db.transaction(["results"], "readonly");
+        const store = tx.objectStore("results");
+        store.getAll().onsuccess = (e) => {
+            const records = e.target.result;
+            const rank3Min = records.filter(r => r.mode === '3min').sort((a, b) => b.score - a.score).slice(0, 10); 
+            const rankCustom = records.filter(r => r.mode === 'custom').sort((a, b) => {
+                const rateA = a.targetCount ? (a.score / a.targetCount) : (a.score / 10);
+                const rateB = b.targetCount ? (b.score / b.targetCount) : (b.score / 10);
+                if (rateB !== rateA) return rateB - rateA; 
+                return (a.time || 9999) - (b.time || 9999); 
+            }).slice(0, 10);
+
+            const renderList = (data, elementId, isCustom) => {
+                const container = document.getElementById(elementId);
+                container.innerHTML = '';
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="empty-history" style="font-size:0.9rem;">まだ きろくが ありません。</div>';
+                    return;
+                }
+                data.forEach((record, index) => {
+                    const rankClass = index < 3 ? `rank-${index + 1}` : '';
+                    const detailText = isCustom ? `${record.score}もん せいかい (${record.time ? record.time.toFixed(2) + 'びょう' : '-'})` : `${record.score}もん`;
+                    const item = document.createElement('div');
+                    item.className = `history-item ${rankClass}`;
+                    item.innerHTML = `<div class="rank-badge">${index + 1}</div><div class="history-content" style="text-align:left;"><span class="history-name" style="font-weight:bold;">${record.name}</span><br><span class="history-score" style="font-size:0.8rem; color:#e74c3c;">${detailText}</span> <span class="history-date" style="font-size:0.7rem; color:#7f8c8d;">${record.date.split(' ')[0]}</span></div>`;
+                    item.style.display = 'flex'; item.style.alignItems = 'center'; item.style.marginBottom = '10px'; item.style.borderBottom = '1px solid #eee'; item.style.paddingBottom = '5px';
+                    container.appendChild(item);
+                });
+            };
+            renderList(rank3Min, 'ranking-3min', false);
+            renderList(rankCustom, 'ranking-custom', true);
+
+            hideAllScreens();
+            document.getElementById('screen-history').classList.remove('hidden');
+            history.pushState({ screen: 'history' }, '');
+        };
+    }
+
+    function showGraph() {
+        if (!db) return;
+        const tx = db.transaction(["results"], "readonly");
+        const store = tx.objectStore("results");
+        
+        store.getAll().onsuccess = (e) => {
+            const records = e.target.result;
+            const currentPlayer = document.getElementById('player-name-input').value.trim() || "ゲスト";
+            const userRecords = records.filter(r => r.name === currentPlayer);
+
+            if(userRecords.length === 0) {
+                alert(`${currentPlayer}さんの きろくが まだありません。`);
+                return;
+            }
+
+            const dailyData = {};
+            userRecords.forEach(r => {
+                const dateKey = r.date.split(' ')[0]; 
+                if(!dailyData[dateKey]) dailyData[dateKey] = { max3Min: null, maxCustomRate: null };
+                if(r.mode === '3min') {
+                    if(dailyData[dateKey].max3Min === null || r.score > dailyData[dateKey].max3Min) dailyData[dateKey].max3Min = r.score;
+                } else if (r.mode === 'custom') {
+                    const rate = (r.score / (r.targetCount || 10)) * 100;
+                    if(dailyData[dateKey].maxCustomRate === null || rate > dailyData[dateKey].maxCustomRate) dailyData[dateKey].maxCustomRate = rate;
+                }
+            });
+
+            const sortedDates = Object.keys(dailyData).sort((a,b) => new Date(a) - new Date(b));
+            const data3Min = sortedDates.map(d => dailyData[d].max3Min);
+            const dataCustom = sortedDates.map(d => dailyData[d].maxCustomRate);
+
+            hideAllScreens();
+            document.getElementById('screen-graph').classList.remove('hidden');
+            history.pushState({ screen: 'graph' }, '');
+
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            if(window.myChart) window.myChart.destroy();
+            
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [
+                        { label: 'さいこう きろく (3ぷん)', data: data3Min, borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.2)', yAxisID: 'y', spanGaps: true, tension: 0.3 },
+                        { label: 'せいかいりつ% (もんだいすう)', data: dataCustom, borderColor: '#f39c12', backgroundColor: 'rgba(243, 156, 18, 0.2)', yAxisID: 'y1', spanGaps: true, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { ticks: { maxRotation: 45, minRotation: 45, font: {size: 10} } },
+                        y: { type: 'linear', display: true, position: 'left', min: 0, suggestedMax: 20 },
+                        y1: { type: 'linear', display: true, position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        };
+    }
+
+    function showCollection() {
+        const name = document.getElementById('player-name-input').value.trim() || "ゲスト";
+        const profile = getPlayerProfile(name);
+        const container = document.getElementById('collection-grid');
+        container.innerHTML = '';
+
+        if (!quizData || !quizData.characters) {
+            container.innerHTML = '<p>データがありません。</p>';
+        } else {
+            quizData.characters.forEach(char => {
+                const isUnlocked = profile.unlocked.includes(char.id);
+                const card = document.createElement('div');
+                card.className = `char-card ${isUnlocked ? '' : 'locked'}`;
+                
+                card.innerHTML = `
+                    <div class="char-emoji">${isUnlocked ? char.emoji : '❓'}</div>
+                    <div class="char-name">${isUnlocked ? char.name : '？？？'}</div>
+                    <div class="char-desc">${char.desc}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        hideAllScreens();
+        document.getElementById('screen-collection').classList.remove('hidden');
+        history.pushState({ screen: 'collection' }, '');
+    }
+
+    function hideAllScreens() {
+        document.getElementById('screen-home').classList.add('hidden');
+        document.getElementById('screen-quiz').classList.add('hidden');
+        document.getElementById('screen-result').classList.add('hidden');
+        document.getElementById('screen-history').classList.add('hidden');
+        document.getElementById('screen-graph').classList.add('hidden');
+        document.getElementById('screen-collection').classList.add('hidden');
+        document.getElementById('screen-celebration').classList.add('hidden');
+        document.getElementById('screen-char-get').classList.add('hidden');
     }
 
     function goHome() {
-        location.href = location.pathname; 
-    }
-
-    // Android/PWAの戻るボタン対応
-    window.addEventListener('popstate', (event) => {
         clearInterval(timerInterval);
-        document.getElementById('screen-quiz').classList.add('hidden');
-        document.getElementById('screen-result').classList.add('hidden');
+        hideAllScreens();
         document.getElementById('screen-home').classList.remove('hidden');
-    });
-
-    // PWA Service Worker のモック登録 (オフラインキャッシュ用)
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            // 実際の実装ではsw.jsを用意しますが、ここではダミー登録でインストール可能要件を満たします
-            navigator.serviceWorker.register(`data:text/javascript,self.addEventListener('fetch',()=>null);`);
-        });
     }
 </script>
-
 </body>
 </html>
