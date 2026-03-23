@@ -62,9 +62,12 @@
         .input-field:focus { border-color: var(--amber-400); }
         .input-field::placeholder { color: var(--amber-300); }
         .start-screen { align-items: center; justify-content: center; text-align: center; gap: 8px; }
+        .splash-bg { position: absolute; inset: 0; background-image: url('images/splash.png'); background-size: cover; background-position: center; z-index: 0; }
+        .splash-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,251,235,0.3) 0%, rgba(255,251,235,0.1) 40%, rgba(255,251,235,0.7) 75%, rgba(255,251,235,1) 100%); }
+        .splash-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: auto; padding-bottom: 20px; }
         .start-icon { font-size: 100px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 8px 16px rgba(245,158,11,0.3)); }
-        .start-title { font-size: 42px; font-weight: 900; color: var(--amber-800); line-height: 1.1; text-shadow: 2px 2px 0 rgba(245,158,11,0.15); }
-        .start-subtitle { font-size: 15px; color: var(--amber-600); font-weight: 700; margin-bottom: 32px; }
+        .start-title { font-size: 42px; font-weight: 900; color: var(--amber-800); line-height: 1.1; text-shadow: 2px 2px 0 rgba(255,255,255,0.6); }
+        .start-subtitle { font-size: 15px; color: var(--amber-700); font-weight: 700; margin-bottom: 32px; text-shadow: 1px 1px 0 rgba(255,255,255,0.6); }
         .xp-section { background: linear-gradient(135deg, rgba(254,243,199,0.8), rgba(253,230,138,0.6)); border: 2px solid var(--amber-200); border-radius: 20px; padding: 20px; }
         .xp-bar-track { width: 100%; height: 14px; background: var(--amber-200); border-radius: 100px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); }
         .xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber-400), var(--amber-500)); border-radius: 100px; transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; }
@@ -162,17 +165,43 @@
     </header>
     <main class="app-main">
         <!-- START -->
-        <div class="screen start-screen active" id="screen-start">
-            <div class="start-icon">📝</div>
-            <h1 class="start-title">めざせ！<br>漢字マスター！</h1>
-            <p class="start-subtitle">〜 よめるかな？ 〜</p>
-            <div style="width:80%;"><button class="btn btn-primary" style="font-size:22px;padding:18px;animation:pulse 1.5s infinite;" onclick="Nav.go('home')">チャレンジ スタート！</button></div>
+        <div class="screen start-screen active" id="screen-start" style="position:relative;overflow:hidden;">
+            <div class="splash-bg"></div>
+            <div class="splash-content">
+                <div class="start-icon">📝</div>
+                <h1 class="start-title">めざせ！<br>漢字マスター！</h1>
+                <p class="start-subtitle">〜 よめるかな？ 〜</p>
+                <div style="width:80%;"><button class="btn btn-primary" style="font-size:22px;padding:18px;animation:pulse 1.5s infinite;" onclick="Nav.go('select')">チャレンジ スタート！</button></div>
+            </div>
+        </div>
+        <!-- SELECT NAME -->
+        <div class="screen start-screen" id="screen-select">
+            <div style="font-size:80px;margin-bottom:8px;">🧑‍🚀</div>
+            <h2 style="font-size:28px;font-weight:900;color:var(--amber-800);margin-bottom:4px;">だれが あそぶ？</h2>
+            <p style="font-size:13px;font-weight:700;color:var(--amber-600);margin-bottom:24px;">なまえを えらんでね</p>
+            <div style="width:85%;">
+                <select id="player-name" class="input-field" style="text-align:left;cursor:pointer;margin-bottom:12px;font-size:20px;padding:16px;">
+                    <option value="">▼ なまえを えらぶ</option>
+                </select>
+                <div id="name-add-area" class="hidden" style="margin-bottom:12px;">
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="new-name-input" class="input-field" style="flex:1;" placeholder="あたらしい なまえ" maxlength="20">
+                        <button class="btn btn-primary" style="width:auto;min-height:auto;padding:10px 14px;font-size:13px;border-radius:14px;" onclick="NameManager.register()">とうろく</button>
+                    </div>
+                </div>
+                <div class="space-y-12">
+                    <button class="btn btn-primary" style="font-size:20px;padding:16px;" onclick="Nav.enterHome()">つぎへ すすむ →</button>
+                    <button class="btn btn-ghost" style="font-size:14px;" onclick="NameManager.showAdd()">＋ あたらしい なまえを とうろく</button>
+                </div>
+            </div>
         </div>
         <!-- HOME -->
         <div class="screen" id="screen-home">
             <div class="xp-section" style="margin-bottom:16px;">
-                <label class="setting-label">🧑‍🚀 キミの なまえ</label>
-                <input type="text" id="player-name" class="input-field" style="margin-bottom:12px;" placeholder="なまえを いれてね">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <span style="font-size:16px;font-weight:900;color:var(--amber-800);">🧑‍🚀 <span id="home-player-name">---</span></span>
+                    <button style="background:var(--amber-200);border:none;padding:6px 12px;border-radius:10px;font-size:11px;font-weight:800;color:var(--amber-700);cursor:pointer;font-family:inherit;" onclick="Nav.go('select')">🔄 きりかえ</button>
+                </div>
                 <div style="background:white;padding:14px;border-radius:14px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
                         <span style="font-size:14px;font-weight:800;">⭐ <span id="home-xp-text">0</span> XP</span>
@@ -236,7 +265,7 @@
         </div>
         <!-- RANKING -->
         <div class="screen" id="screen-ranking">
-            <h2 style="font-size:24px;font-weight:900;color:var(--amber-800);margin-bottom:16px;">👑 ランキング</h2>
+            <h2 style="font-size:24px;font-weight:900;color:var(--amber-800);margin-bottom:16px;">👑 <span id="rank-player-name">---</span> の ランキング</h2>
             <div class="card" style="margin-bottom:16px;"><h3 style="font-size:16px;font-weight:800;color:var(--green-600);border-bottom:2px solid var(--green-400);padding-bottom:8px;margin-bottom:8px;">⏱️ 3ぷんかん</h3><div id="rank-3min"></div></div>
             <div class="card" style="margin-bottom:16px;"><h3 style="font-size:16px;font-weight:800;color:var(--amber-600);border-bottom:2px solid var(--amber-300);padding-bottom:8px;margin-bottom:8px;">🎯 もんだいすう</h3><div id="rank-custom"></div></div>
             <button class="btn btn-ghost" onclick="Nav.go('home')">🏠 ホーム</button>
@@ -248,9 +277,37 @@
             <div id="collection-container"></div>
             <button class="btn btn-ghost" style="margin-top:16px;" onclick="Nav.go('home')">🏠 ホーム</button>
         </div>
+        <!-- STATS -->
+        <div class="screen" id="screen-stats">
+            <h2 style="font-size:24px;font-weight:900;color:var(--amber-800);margin-bottom:4px;">📊 <span id="stats-player-name">---</span> の せいせき</h2>
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                <div class="card" style="flex:1;text-align:center;padding:16px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--stone-500);">⭐ XP</div>
+                    <div style="font-size:28px;font-weight:900;color:var(--amber-600);" id="stats-xp">0</div>
+                </div>
+                <div class="card" style="flex:1;text-align:center;padding:16px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--stone-500);">📝 クイズ回数</div>
+                    <div style="font-size:28px;font-weight:900;color:var(--blue-500);" id="stats-total-games">0</div>
+                </div>
+                <div class="card" style="flex:1;text-align:center;padding:16px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--stone-500);">✅ 平均正解率</div>
+                    <div style="font-size:28px;font-weight:900;color:var(--green-600);" id="stats-avg-rate">-</div>
+                </div>
+            </div>
+            <div class="card" style="margin-bottom:16px;">
+                <h3 style="font-size:15px;font-weight:800;color:var(--amber-700);border-bottom:2px solid var(--amber-200);padding-bottom:8px;margin-bottom:8px;">🕐 さいきんの きろく</h3>
+                <div id="stats-history" style="max-height:300px;overflow-y:auto;"></div>
+            </div>
+            <div class="card" style="margin-bottom:16px;">
+                <h3 style="font-size:15px;font-weight:800;color:var(--green-600);border-bottom:2px solid var(--green-400);padding-bottom:8px;margin-bottom:8px;">🏅 じこベスト</h3>
+                <div id="stats-best"></div>
+            </div>
+            <button class="btn btn-ghost" onclick="Nav.go('home')">🏠 ホーム</button>
+        </div>
         <!-- SETTINGS -->
         <div class="screen" id="screen-settings">
             <h2 style="font-size:24px;font-weight:900;color:var(--amber-800);margin-bottom:16px;">⚙️ せってい</h2>
+            <p style="font-size:12px;font-weight:700;color:var(--amber-600);background:var(--amber-50);padding:10px;border-radius:12px;border:1px solid var(--amber-200);margin-bottom:16px;">📌 せっていは なまえごとに ほぞんされます。</p>
             <div class="setting-group space-y-16">
                 <div><label class="setting-label">🎯 もんだいの かず (1〜100)</label><input type="number" id="setting-count" class="input-field" value="10" min="1" max="100"><div class="setting-note">「クイズにちょうせん」での もんだい数です。</div></div>
                 <div><label class="setting-label">⏱️ 1もんの じかん (秒)</label><input type="number" id="setting-time" class="input-field" value="0" min="0" max="60"><div class="setting-note">0にすると じかん制限なし になります。</div></div>
@@ -264,6 +321,7 @@
     <nav class="bottom-nav" id="bottom-nav">
         <button class="nav-item" onclick="Nav.go('home')" data-nav="home">🗺️<span>ホーム</span></button>
         <button class="nav-item active" onclick="Nav.go('home')" data-nav="study">📖<span>クイズ</span></button>
+        <button class="nav-item" onclick="Nav.go('stats')" data-nav="stats">📊<span>せいせき</span></button>
         <button class="nav-item" onclick="Nav.go('collection')" data-nav="collection">🎁<span>ずかん</span></button>
         <button class="nav-item" onclick="Nav.go('ranking')" data-nav="ranking">🏆<span>ランク</span></button>
         <button class="nav-item" onclick="Nav.go('settings')" data-nav="settings">⚙️<span>せってい</span></button>
@@ -416,6 +474,61 @@ const Profile = {
     }
 };
 
+// ==========================================
+// Name Manager
+// ==========================================
+const NameManager = {
+    KEY: 'kmPlayerNames',
+    LAST: 'kmLastPlayer',
+    getAll: () => {
+        try { return JSON.parse(localStorage.getItem(NameManager.KEY)) || []; }
+        catch { return []; }
+    },
+    saveAll: (names) => localStorage.setItem(NameManager.KEY, JSON.stringify(names)),
+    add: (name) => {
+        const names = NameManager.getAll();
+        if (!names.includes(name)) { names.push(name); NameManager.saveAll(names); }
+    },
+    getLast: () => localStorage.getItem(NameManager.LAST) || '',
+    setLast: (name) => localStorage.setItem(NameManager.LAST, name),
+    populateSelect: () => {
+        const sel = document.getElementById('player-name');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">なまえを えらんでね</option>';
+        NameManager.getAll().forEach(n => {
+            const opt = document.createElement('option');
+            opt.value = n; opt.textContent = n;
+            sel.appendChild(opt);
+        });
+        if (cur && NameManager.getAll().includes(cur)) sel.value = cur;
+    },
+    showAdd: () => {
+        const area = document.getElementById('name-add-area');
+        area.classList.toggle('hidden');
+        if (!area.classList.contains('hidden')) document.getElementById('new-name-input').focus();
+    },
+    register: () => {
+        const input = document.getElementById('new-name-input');
+        const name = input.value.trim();
+        if (!name) { alert('なまえを いれてね！'); input.focus(); return; }
+        if (NameManager.getAll().includes(name)) { alert('その なまえは もう あるよ！'); return; }
+        NameManager.add(name);
+        NameManager.populateSelect();
+        document.getElementById('player-name').value = name;
+        NameManager.setLast(name);
+        input.value = '';
+        document.getElementById('name-add-area').classList.add('hidden');
+        Nav.setupHome();
+    },
+    // Migrate old single-name data
+    migrate: () => {
+        const oldName = localStorage.getItem('kmPlayerName');
+        if (oldName && !NameManager.getAll().includes(oldName)) {
+            NameManager.add(oldName);
+        }
+    }
+};
+
 const Popup = {
     show: id => document.getElementById(id).classList.add('active'),
     hide: id => document.getElementById(id).classList.remove('active'),
@@ -423,19 +536,34 @@ const Popup = {
 
 const UserSettings = {
     targetCount: 10, timeLimit: 0,
+    _key: (name) => 'kmSettings_' + (name || 'default'),
     init: async () => {
-        UserSettings.targetCount = await DB.get('targetCount') || 10;
-        UserSettings.timeLimit = await DB.get('timeLimit') || 0;
+        NameManager.migrate();
+        NameManager.populateSelect();
+        const last = NameManager.getLast();
+        if (last) document.getElementById('player-name').value = last;
+        UserSettings.loadForUser();
         document.getElementById('setting-count').value = UserSettings.targetCount;
         document.getElementById('setting-time').value = UserSettings.timeLimit;
-        const n = localStorage.getItem('kmPlayerName');
-        if (n) document.getElementById('player-name').value = n;
+    },
+    loadForUser: () => {
+        const name = document.getElementById('player-name').value.trim();
+        try {
+            const d = JSON.parse(localStorage.getItem(UserSettings._key(name)));
+            UserSettings.targetCount = d?.targetCount || 10;
+            UserSettings.timeLimit = d?.timeLimit || 0;
+        } catch {
+            UserSettings.targetCount = 10;
+            UserSettings.timeLimit = 0;
+        }
     },
     save: async () => {
+        const name = document.getElementById('player-name').value.trim();
+        if (!name) { alert('まず なまえを えらんでね！'); return; }
         const c = Math.max(1, Math.min(100, parseInt(document.getElementById('setting-count').value) || 10));
         const t = Math.max(0, Math.min(60, parseInt(document.getElementById('setting-time').value) || 0));
         UserSettings.targetCount = c; UserSettings.timeLimit = t;
-        await DB.set('targetCount', c); await DB.set('timeLimit', t);
+        localStorage.setItem(UserSettings._key(name), JSON.stringify({ targetCount: c, timeLimit: t }));
         const btn = event.target; const orig = btn.innerHTML;
         btn.innerHTML = '✨ ほぞんしたよ！'; btn.style.background = 'var(--green-500)'; btn.style.color = 'white';
         setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 1200);
@@ -452,18 +580,39 @@ const Nav = {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const el = document.getElementById('screen-' + id);
         if (el) el.classList.add('active');
-        document.getElementById('app-header').classList.toggle('hidden', id === 'start');
-        document.getElementById('bottom-nav').classList.toggle('hidden', ['start','quiz'].includes(id));
+        document.getElementById('app-header').classList.toggle('hidden', ['start','select'].includes(id));
+        document.getElementById('bottom-nav').classList.toggle('hidden', ['start','select','quiz'].includes(id));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const map = { home:'study', collection:'collection', ranking:'ranking', settings:'settings' };
+        const map = { home:'study', collection:'collection', ranking:'ranking', settings:'settings', stats:'stats' };
         if (map[id]) { const a = document.querySelector('.nav-item[data-nav="'+map[id]+'"]'); if (a) a.classList.add('active'); }
         Nav.current = id;
         if (id === 'home') Nav.setupHome();
         if (id === 'ranking') Nav.setupRanking();
         if (id === 'collection') Nav.setupCollection();
+        if (id === 'stats') Nav.setupStats();
+        if (id === 'settings') Nav.setupSettings();
+    },
+    enterHome: () => {
+        const name = document.getElementById('player-name').value.trim();
+        if (!name) { alert('なまえを えらんでね！'); return; }
+        NameManager.setLast(name);
+        UserSettings.loadForUser();
+        Nav.go('home');
     },
     setupHome: () => {
-        const name = document.getElementById('player-name').value.trim() || 'ゲスト';
+        const name = document.getElementById('player-name').value.trim();
+        document.getElementById('home-player-name').textContent = name || '---';
+        if (!name) {
+            document.getElementById('home-xp-text').textContent = '0';
+            document.getElementById('header-xp').textContent = '0 XP';
+            document.getElementById('home-xp-next').textContent = 'なまえを えらんでね';
+            document.getElementById('home-xp-bar').style.width = '0%';
+            document.getElementById('home-correct-label').textContent = '✅ 8わり いじょう せいかいで +1XP！';
+            document.getElementById('home-correct-bar').style.width = '0%';
+            return;
+        }
+        NameManager.setLast(name);
+        UserSettings.loadForUser();
         const p = Profile.get(name);
         document.getElementById('home-xp-text').textContent = p.xp;
         document.getElementById('header-xp').textContent = p.xp + ' XP';
@@ -473,15 +622,24 @@ const Nav = {
         document.getElementById('home-correct-label').textContent = '✅ 8わり いじょう せいかいで +1XP！';
         document.getElementById('home-correct-bar').style.width = '0%';
     },
+    setupSettings: () => {
+        UserSettings.loadForUser();
+        document.getElementById('setting-count').value = UserSettings.targetCount;
+        document.getElementById('setting-time').value = UserSettings.timeLimit;
+    },
     setupRanking: async () => {
-        const records = await DB.getAllRecords();
+        const name = document.getElementById('player-name').value.trim();
+        document.getElementById('rank-player-name').textContent = name || '---';
+        const allRecords = await DB.getAllRecords();
+        const records = name ? allRecords.filter(r => r.name === name) : [];
         const render = (data, el, isC) => {
             el.innerHTML = '';
+            if (!name) { el.innerHTML = '<div style="text-align:center;padding:16px;font-size:13px;color:var(--stone-400);font-weight:700;">なまえを えらんでね</div>'; return; }
             if (!data.length) { el.innerHTML = '<div style="text-align:center;padding:16px;font-size:13px;color:var(--stone-400);font-weight:700;">きろくが ありません。</div>'; return; }
             data.forEach((r,i) => {
                 const d = isC ? r.score+'もん <span style="font-size:11px;color:var(--stone-400);">('+(r.time?r.time.toFixed(1)+'s':'-')+')</span>' : r.score+' もん';
                 const bc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
-                el.innerHTML += '<div class="rank-item"><div class="rank-badge '+bc+'">'+(i+1)+'</div><div style="flex:1;min-width:0;"><div style="font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHTML(r.name)+'</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;"><span style="font-weight:800;color:var(--amber-600);">'+d+'</span><span style="font-size:10px;color:var(--stone-400);">'+(r.date?.split(' ')[0]||'')+'</span></div></div></div>';
+                el.innerHTML += '<div class="rank-item"><div class="rank-badge '+bc+'">'+(i+1)+'</div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;"><span style="font-weight:800;color:var(--amber-600);">'+d+'</span><span style="font-size:10px;color:var(--stone-400);">'+(r.date?.split(' ')[0]||'')+'</span></div></div></div>';
             });
         };
         const r3 = records.filter(r => r.mode==='3min').sort((a,b) => b.score-a.score).slice(0,10);
@@ -489,8 +647,64 @@ const Nav = {
         render(r3, document.getElementById('rank-3min'), false);
         render(rc, document.getElementById('rank-custom'), true);
     },
+    setupStats: async () => {
+        const name = document.getElementById('player-name').value.trim();
+        document.getElementById('stats-player-name').textContent = name || '---';
+        if (!name) {
+            document.getElementById('stats-xp').textContent = '0';
+            document.getElementById('stats-total-games').textContent = '0';
+            document.getElementById('stats-avg-rate').textContent = '-';
+            document.getElementById('stats-history').innerHTML = '<div style="text-align:center;padding:16px;font-size:13px;color:var(--stone-400);font-weight:700;">なまえを えらんでね</div>';
+            document.getElementById('stats-best').innerHTML = '';
+            return;
+        }
+        const p = Profile.get(name);
+        const records = await DB.getAllRecords();
+        const myRecords = records.filter(r => r.name === name).reverse();
+        document.getElementById('stats-xp').textContent = p.xp;
+        document.getElementById('stats-total-games').textContent = myRecords.length;
+        // Average correct rate
+        const customRecords = myRecords.filter(r => r.mode === 'custom' && r.targetCount > 0);
+        if (customRecords.length > 0) {
+            const avgRate = Math.round(customRecords.reduce((s, r) => s + (r.score / r.targetCount) * 100, 0) / customRecords.length);
+            document.getElementById('stats-avg-rate').textContent = avgRate + '%';
+        } else {
+            document.getElementById('stats-avg-rate').textContent = '-';
+        }
+        // Recent history (last 20)
+        const histEl = document.getElementById('stats-history');
+        const recent = myRecords.slice(0, 20);
+        if (!recent.length) {
+            histEl.innerHTML = '<div style="text-align:center;padding:16px;font-size:13px;color:var(--stone-400);font-weight:700;">きろくが ありません。</div>';
+        } else {
+            histEl.innerHTML = recent.map(r => {
+                const modeLabel = r.mode === '3min' ? '⏱️ 3分' : '🎯 ' + r.targetCount + '問';
+                const scoreText = r.mode === '3min' ? r.score + 'もん' : r.score + '/' + r.targetCount + ' (' + Math.round(r.score / r.targetCount * 100) + '%)';
+                const timeText = r.mode !== '3min' && r.time ? r.time.toFixed(1) + 's' : '';
+                return '<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--amber-100);gap:10px;">' +
+                    '<div style="font-size:11px;font-weight:700;color:var(--stone-400);min-width:55px;">' + (r.date?.split(' ')[0] || '') + '</div>' +
+                    '<div style="background:var(--amber-100);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:800;color:var(--amber-700);white-space:nowrap;">' + modeLabel + '</div>' +
+                    '<div style="flex:1;font-weight:800;font-size:14px;color:var(--amber-900);">' + scoreText + '</div>' +
+                    (timeText ? '<div style="font-size:11px;font-weight:700;color:var(--stone-400);">' + timeText + '</div>' : '') +
+                    '</div>';
+            }).join('');
+        }
+        // Personal best
+        const bestEl = document.getElementById('stats-best');
+        let bestHtml = '';
+        const my3min = myRecords.filter(r => r.mode === '3min');
+        if (my3min.length) {
+            const best3 = my3min.reduce((a, b) => a.score > b.score ? a : b);
+            bestHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--amber-100);"><span style="font-weight:700;font-size:13px;color:var(--stone-600);">⏱️ 3分チャレンジ</span><span style="font-weight:900;font-size:16px;color:var(--amber-600);">' + best3.score + ' もん</span></div>';
+        }
+        if (customRecords.length) {
+            const bestC = customRecords.reduce((a, b) => (a.score / a.targetCount) > (b.score / b.targetCount) ? a : ((a.score / a.targetCount) === (b.score / b.targetCount) && a.time < b.time ? a : b));
+            bestHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;"><span style="font-weight:700;font-size:13px;color:var(--stone-600);">🎯 クイズ</span><span style="font-weight:900;font-size:16px;color:var(--amber-600);">' + bestC.score + '/' + bestC.targetCount + ' (' + Math.round(bestC.score / bestC.targetCount * 100) + '%) ' + (bestC.time ? bestC.time.toFixed(1) + 's' : '') + '</span></div>';
+        }
+        bestEl.innerHTML = bestHtml || '<div style="text-align:center;padding:16px;font-size:13px;color:var(--stone-400);font-weight:700;">きろくが ありません。</div>';
+    },
     setupCollection: () => {
-        const name = document.getElementById('player-name').value.trim() || 'ゲスト';
+        const name = document.getElementById('player-name').value.trim() || '';
         const p = Profile.get(name);
         const container = document.getElementById('collection-container');
         container.innerHTML = '';
@@ -542,10 +756,10 @@ const Quiz = {
         const catId = 'kanji_g' + grade + '_' + reading;
         const cat = quizData.categories.find(c => c.id === catId);
         if (!cat || !cat.questions.length) return alert('もんだいが ありません。');
-        const ne = document.getElementById('player-name');
-        Quiz.playerName = ne.value.trim();
-        if (!Quiz.playerName) { alert('なまえを いれてね！'); ne.focus(); return; }
-        localStorage.setItem('kmPlayerName', Quiz.playerName);
+        const name = document.getElementById('player-name').value.trim();
+        if (!name) { alert('なまえを えらんでね！'); return; }
+        Quiz.playerName = name;
+        NameManager.setLast(name);
         Quiz.mode = mode; Quiz.data = cat.questions;
         Quiz.targetCount = UserSettings.targetCount; Quiz.timeLimit = UserSettings.timeLimit;
         Quiz.qCount = Quiz.score = 0; Quiz.isPaused = false; Quiz.startTime = Date.now();
@@ -627,8 +841,8 @@ const Quiz = {
         else { label.textContent=Quiz.targetCount+'もん おわるのに かかった じかん：'; scoreEl.innerHTML=time.toFixed(1)+' びょう<br><span style="font-size:24px;color:var(--stone-400);">せいかい: '+Quiz.score+' / '+Quiz.targetCount+'</span>'; }
 
         // XP: 8 correct = +1 XP
-        const { profile: p, oldXp, xpGained } = Profile.addCorrect(Quiz.playerName, Quiz.score, Quiz.qIndex);
-        const pct = Quiz.qIndex > 0 ? Math.round(Quiz.score / Quiz.qIndex * 100) : 0;
+        const { profile: p, oldXp, xpGained } = Profile.addCorrect(Quiz.playerName, Quiz.score, Quiz.qCount);
+        const pct = Quiz.qCount > 0 ? Math.round(Quiz.score / Quiz.qCount * 100) : 0;
         const xpArea = document.getElementById('result-xp-area');
         if (xpGained > 0) {
             xpArea.innerHTML = '<div class="result-xp leveled">⭐ +1 XP ゲット！</div><div style="font-size:12px;color:var(--stone-500);font-weight:600;margin-top:6px;">せいかいりつ '+pct+'%（8わり いじょうで XP ゲット！）</div>';
@@ -683,8 +897,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && Nav
     try { await DataLoader.load(); await DB.init(); await UserSettings.init(); }
     catch (e) { console.error('Init error:', e); }
     document.getElementById('loading-overlay').classList.add('done');
-    document.getElementById('player-name').addEventListener('input', () => { if (Nav.current==='home') Nav.setupHome(); });
-    document.getElementById('player-name').addEventListener('keypress', e => { if (e.key==='Enter') e.target.blur(); });
+    document.getElementById('new-name-input').addEventListener('keypress', e => { if (e.key==='Enter') NameManager.register(); });
 })();
 </script>
 </body>
